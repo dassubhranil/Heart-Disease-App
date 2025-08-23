@@ -152,10 +152,35 @@ if st.session_state.prediction_made:
     st.subheader('Prediction Explanation')
     st.write("The plot below shows how each feature contributed to the final prediction. Features in red increase the risk score, while those in blue decrease it.")
     
+    # Create a mapping for more readable feature names for the plot
+    feature_name_map = {
+        'age': 'Age',
+        'trestbps': 'Resting Blood Pressure',
+        'chol': 'Cholesterol',
+        'fbs': 'Fasting Blood Sugar > 120 mg/dl',
+        'thalch': 'Max Heart Rate Achieved',
+        'exang': 'Exercise Induced Angina',
+        'oldpeak': 'ST Depression',
+        'ca': 'Number of Major Vessels',
+        'sex_Male': 'Sex: Male',
+        'cp_atypical angina': 'Chest Pain: Atypical Angina',
+        'cp_non-anginal': 'Chest Pain: Non-Anginal',
+        'cp_typical angina': 'Chest Pain: Typical Angina',
+        'restecg_normal': 'Resting ECG: Normal',
+        'restecg_st-t abnormality': 'Resting ECG: ST-T Abnormality',
+        'slope_flat': 'Slope: Flat',
+        'slope_upsloping': 'Slope: Upsloping',
+        'thal_normal': 'Thalassemia: Normal',
+        'thal_reversable defect': 'Thalassemia: Reversible Defect'
+    }
+    
+    # Create a list of new feature names, falling back to original if not in map
+    display_feature_names = [feature_name_map.get(f, f) for f in st.session_state.input_df.columns]
+    
     shap_explanation = shap.Explanation(values=st.session_state.shap_values[0], 
                                           base_values=explainer.expected_value, 
                                           data=st.session_state.input_df.iloc[0],
-                                          feature_names=st.session_state.input_df.columns.tolist())
+                                          feature_names=display_feature_names) # Use the new, readable names
     
     fig, ax = plt.subplots()
     shap.plots.waterfall(shap_explanation, max_display=14, show=False)
@@ -174,10 +199,11 @@ if st.session_state.prediction_made:
 
         # Get SHAP values and feature names from session state
         shap_values_for_prediction = st.session_state.shap_values[0]
+        # Use original feature names for logic
         feature_names = st.session_state.input_df.columns
         feature_shap_values = dict(zip(feature_names, shap_values_for_prediction))
 
-        # Dictionary of lifestyle advice
+        # Dictionary of lifestyle advice (uses original feature names as keys)
         lifestyle_advice = {
             'trestbps': "Your **Resting Blood Pressure** is a key risk factor. Consider reducing salt intake, increasing physical activity, and managing stress.",
             'chol': "High **Cholesterol** is significantly increasing your risk. Focus on a diet rich in fruits, vegetables, and whole grains, and reduce saturated and trans fats.",

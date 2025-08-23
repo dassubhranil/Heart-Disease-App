@@ -4,14 +4,7 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 
-# --- Page Configuration ---
-st.set_page_config(
-    page_title="Heart Disease Prediction App",
-    page_icon="🩺",
-    layout="wide"
-)
-
-# --- STYLING ---
+# --- STYLING for link buttons ---
 st.markdown("""
 <style>
 .icon-button {
@@ -27,7 +20,6 @@ st.markdown("""
     margin: 0 5px;
     line-height: 1.6;
     height: 100%;
-    border: 1px solid #357ABD;
 }
 .icon-button:hover {
     background-color: #357ABD;
@@ -39,8 +31,10 @@ st.markdown("""
     margin-right: 8px;
     filter: brightness(0) invert(1);
 }
-.stButton>button {
-    width: 100%;
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -49,89 +43,77 @@ st.markdown("""
 # --- Load Trained Model and SHAP Explainer ---
 @st.cache_data
 def load_model_and_explainer():
-    """Loads the pre-trained model and SHAP explainer."""
     try:
         model = joblib.load('heart_disease_model.joblib')
         explainer = shap.TreeExplainer(model)
         return model, explainer
     except FileNotFoundError:
-        st.error("Model file not found. Please ensure 'heart_disease_model.joblib' is in the same directory.")
-        return None, None
-    except Exception as e:
-        st.error(f"An error occurred while loading the model: {e}")
+        st.error("Model file not found.")
         return None, None
 
 model, explainer = load_model_and_explainer()
 
-# --- Initialize Session State for all inputs ---
+# --- Initialize Session State ---
 if 'prediction_made' not in st.session_state:
     st.session_state.prediction_made = False
 
-default_patient = {
-    'age': 55, 'sex': 'Male', 'cp': 'asymptomatic', 'trestbps': 130, 'chol': 240,
-    'fbs': 0, 'restecg': 'normal', 'thalch': 150, 'exang': 0, 'oldpeak': 1.0,
-    'slope': 'flat', 'ca': 0, 'thal': 'normal'
-}
-for key, value in default_patient.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
-
 # --- App State Management Functions ---
 def reset_state():
-    """Resets the app to its initial state."""
     st.session_state.prediction_made = False
-    for key, value in default_patient.items():
-        st.session_state[key] = value
     keys_to_delete = ['input_df', 'prediction', 'prediction_proba', 'shap_values']
     for key in keys_to_delete:
         if key in st.session_state:
             del st.session_state[key]
 
-# --- UI Header ---
+# --- App UI ---
+# --- Title, Links, and Reset Button ---
 title_col, buttons_col = st.columns([3, 2])
+
 with title_col:
     st.title('🩺 Heart Disease Prediction App')
+
 with buttons_col:
-    st.write("") # Spacer
+    # Use columns with a small gap to group buttons tightly
     col1, col2, col3 = st.columns([1, 1, 1], gap="small")
     with col1:
-        st.markdown('<a href="https://linkedin.com/in/subhranil-das" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3NXZz4="> LinkedIn</a>', unsafe_allow_html=True)
+        st.markdown('<a href="https://linkedin.com/in/subhranil-das" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3N2Zz4="> LinkedIn</a>', unsafe_allow_html=True)
     with col2:
         st.markdown('<a href="https://github.com/dassubhranil" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
     with col3:
-        st.button('Reset Inputs', key='reset_button_app', on_click=reset_state)
+        if st.button('Reset', key='reset_button_app', use_container_width=True):
+            reset_state()
 
-st.write("---")
+st.write("---") # Separator
 
-# --- UI Input Section ---
+# ... (The rest of your heart disease app code remains the same) ...
 with st.expander("Enter Patient Data", expanded=True):
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.slider('Age', 29, 77, key='age')
-        st.selectbox('Sex', ('Male', 'Female'), key='sex')
-        st.selectbox('Chest Pain Type (cp)', ('typical angina', 'atypical angina', 'non-anginal', 'asymptomatic'), key='cp')
-        st.selectbox('Fasting Blood Sugar > 120 mg/dl (fbs)', (0, 1), format_func=lambda x: 'True' if x == 1 else 'False', key='fbs')
+        age = st.slider('Age', 29, 77, 55)
+        sex = st.selectbox('Sex', ('Male', 'Female'))
+        cp = st.selectbox('Chest Pain Type (cp)', ('typical angina', 'atypical angina', 'non-anginal', 'asymptomatic'))
+        fbs = st.selectbox('Fasting Blood Sugar < 120 mg/dl (fbs)', (0, 1), format_func=lambda x: 'True' if x == 1 else 'False')
     with col2:
-        st.slider('Resting Blood Pressure (trestbps)', 94, 200, key='trestbps')
-        st.slider('Serum Cholesterol (chol)', 126, 564, key='chol')
-        st.selectbox('Resting ECG (restecg)', ('normal', 'st-t abnormality', 'lv hypertrophy'), key='restecg')
-        st.selectbox('Exercise Induced Angina (exang)', (0, 1), format_func=lambda x: 'Yes' if x == 1 else 'No', key='exang')
+        trestbps = st.slider('Resting Blood Pressure (trestbps)', 94, 200, 130)
+        chol = st.slider('Serum Cholesterol (chol)', 126, 564, 240)
+        restecg = st.selectbox('Resting ECG (restecg)', ('normal', 'st-t abnormality', 'lv hypertrophy'))
+        exang = st.selectbox('Exercise Induced Angina (exang)', (0, 1), format_func=lambda x: 'Yes' if x == 1 else 'No')
     with col3:
-        st.slider('Max Heart Rate Achieved (thalch)', 71, 202, key='thalch')
-        st.slider('ST depression (oldpeak)', 0.0, 6.2, key='oldpeak', step=0.1)
-        st.selectbox('Slope of ST segment (slope)', ('upsloping', 'flat', 'downsloping'), key='slope')
-        st.slider('Number of major vessels (ca)', 0, 4, key='ca')
-        st.selectbox('Thalassemia (thal)', ('normal', 'fixed defect', 'reversable defect'), key='thal')
+        thalch = st.slider('Max Heart Rate Achieved (thalch)', 71, 202, 150)
+        oldpeak = st.slider('ST depression (oldpeak)', 0.0, 6.2, 1.0)
+        slope = st.selectbox('Slope of ST segment (slope)', ('upsloping', 'flat', 'downsloping'))
+        ca = st.slider('Number of major vessels (ca)', 0, 3, 0)
+        thal = st.selectbox('Thalassemia (thal)', ('normal', 'fixed defect', 'reversable defect'))
 
 def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, oldpeak, slope, ca, thal):
-    """One-hot encodes user input into a DataFrame for the model."""
     model_columns = [
         'age', 'trestbps', 'chol', 'fbs', 'thalch', 'exang', 'oldpeak', 'ca',
         'sex_Male', 'cp_atypical angina', 'cp_non-anginal', 'cp_typical angina',
         'restecg_normal', 'restecg_st-t abnormality', 'slope_flat', 'slope_upsloping',
         'thal_normal', 'thal_reversable defect'
     ]
-    input_data = pd.DataFrame(0, index=[0], columns=model_columns)
+    input_data = pd.DataFrame(columns=model_columns)
+    input_data.loc[0] = 0
     input_data['age'] = age
     input_data['trestbps'] = trestbps
     input_data['chol'] = chol
@@ -141,71 +123,57 @@ def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, old
     input_data['oldpeak'] = oldpeak
     input_data['ca'] = ca
     
-    if sex == 'Male': input_data['sex_Male'] = 1
-    if cp == 'typical angina': input_data['cp_typical angina'] = 1
-    elif cp == 'atypical angina': input_data['cp_atypical angina'] = 1
-    elif cp == 'non-anginal': input_data['cp_non-anginal'] = 1
-    if restecg == 'normal': input_data['restecg_normal'] = 1
-    elif restecg == 'st-t abnormality': input_data['restecg_st-t abnormality'] = 1
-    if slope == 'upsloping': input_data['slope_upsloping'] = 1
-    elif slope == 'flat': input_data['slope_flat'] = 1
-    if thal == 'normal': input_data['thal_normal'] = 1
-    elif thal == 'reversable defect': input_data['thal_reversable defect'] = 1
+    if sex == 'Male':
+        input_data['sex_Male'] = 1
+    
+    if cp == 'typical angina':
+        input_data['cp_typical angina'] = 1
+    elif cp == 'atypical angina':
+        input_data['cp_atypical angina'] = 1
+    elif cp == 'non-anginal':
+        input_data['cp_non-anginal'] = 1
+        
+    if restecg == 'normal':
+        input_data['restecg_normal'] = 1
+    elif restecg == 'st-t abnormality':
+        input_data['restecg_st-t abnormality'] = 1
+        
+    if slope == 'upsloping':
+        input_data['slope_upsloping'] = 1
+    elif slope == 'flat':
+        input_data['slope_flat'] = 1
+
+    if thal == 'normal':
+        input_data['thal_normal'] = 1
+    elif thal == 'reversable defect':
+        input_data['thal_reversable defect'] = 1
         
     return input_data
 
-if st.button('Predict Heart Disease Risk', key='predict_button', use_container_width=True):
-    st.session_state.prediction_made = False
-    if model is not None and explainer is not None:
-        st.session_state.input_df = process_input(
-            st.session_state.age, st.session_state.sex, st.session_state.cp,
-            st.session_state.trestbps, st.session_state.chol, st.session_state.fbs,
-            st.session_state.restecg, st.session_state.thalch, st.session_state.exang,
-            st.session_state.oldpeak, st.session_state.slope, st.session_state.ca,
-            st.session_state.thal
-        )
+if st.button('Predict Heart Disease Risk', key='predict_button'):
+    reset_state()
+    if model is not None:
+        st.session_state.input_df = process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, oldpeak, slope, ca, thal)
         st.session_state.prediction = model.predict(st.session_state.input_df)
         st.session_state.prediction_proba = model.predict_proba(st.session_state.input_df)
         st.session_state.shap_values = explainer.shap_values(st.session_state.input_df)
         st.session_state.prediction_made = True
     else:
-        st.warning("Model or explainer is not loaded. Cannot make a prediction.")
+        st.warning("Model is not loaded.")
 
-# --- Results Display Section ---
 if st.session_state.prediction_made:
-    predicted_class = st.session_state.prediction[0]
-    prediction_probability = st.session_state.prediction_proba[0][predicted_class] * 100
-
-    CLASS_LABELS = {
-        0: "Class 0: No/Low Risk", 1: "Class 1: Mild Risk", 2: "Class 2: Moderate Risk",
-        3: "Class 3: High Risk", 4: "Class 4: Very High Risk"
-    }
-    class_label = CLASS_LABELS.get(predicted_class, f"Class {predicted_class}")
-
     st.subheader('Prediction Result')
-    if predicted_class == 0:
-        st.success(f'Predicted Risk Level: **{class_label}** (Confidence: {prediction_probability:.2f}%)')
+    if st.session_state.prediction[0] == 1:
+        st.error(f'High Risk (Probability: {st.session_state.prediction_proba[0][1]*100:.2f}%)')
     else:
-        st.error(f'Predicted Risk Level: **{class_label}** (Confidence: {prediction_probability:.2f}%)')
+        st.success(f'Low Risk (Probability: {st.session_state.prediction_proba[0][0]*100:.2f}%)')
+
+    st.subheader('Prediction Explanation')
+    st.write("The plot below shows how each feature contributed to the final prediction. Features in red increase the risk score, while those in blue decrease it.")
     
-    st.markdown("---")
-    
-    explanation_class = st.selectbox(
-        "Select a risk class to see its explanation:",
-        options=list(CLASS_LABELS.keys()),
-        format_func=lambda x: CLASS_LABELS[x],
-        index=int(predicted_class),
-        key='explanation_class_selector'
-    )
-    class_to_explain_label = CLASS_LABELS.get(explanation_class)
-
-
-    st.subheader(f'Explanation for "{class_to_explain_label}"')
-    st.write(f"This plot shows the factors pushing the prediction towards or away from this specific risk class.")
-
     feature_name_map = {
         'age': 'Age', 'trestbps': 'Resting Blood Pressure', 'chol': 'Cholesterol',
-        'fbs': 'Fasting Blood Sugar > 120 mg/dl', 'thalch': 'Max Heart Rate Achieved',
+        'fbs': 'Fasting Blood Sugar < 120 mg/dl', 'thalch': 'Max Heart Rate Achieved',
         'exang': 'Exercise Induced Angina', 'oldpeak': 'ST Depression',
         'ca': 'Number of Major Vessels', 'sex_Male': 'Sex: Male',
         'cp_atypical angina': 'Chest Pain: Atypical Angina', 'cp_non-anginal': 'Chest Pain: Non-Anginal',
@@ -214,59 +182,132 @@ if st.session_state.prediction_made:
         'slope_upsloping': 'Slope: Upsloping', 'thal_normal': 'Thalassemia: Normal',
         'thal_reversable defect': 'Thalassemia: Reversible Defect'
     }
+    
     display_feature_names = [feature_name_map.get(f, f) for f in st.session_state.input_df.columns]
     
-    shap_values_instance = st.session_state.shap_values[explanation_class][0]
-    base_value = explainer.expected_value[explanation_class]
+    # --- FIXED SHAP PLOT LOGIC ---
+    # Get the input data for the current prediction
+    input_instance = st.session_state.input_df.iloc[0]
 
-    # --- FIX: Create a more robust SHAP Explanation object ---
-    # The waterfall plot doesn't require the original data values, so we can omit them
-    # to prevent potential type/shape mismatch errors.
-    shap_explanation = shap.Explanation(
-        values=shap_values_instance, 
-        base_values=base_value,
-        feature_names=display_feature_names
-    )
+    # Find the indices of features that have a non-zero value
+    active_feature_indices = [i for i, val in enumerate(input_instance) if val != 0]
+
+    # Filter the SHAP values, data, and feature names to only include active features
+    filtered_shap_values = st.session_state.shap_values[0][active_feature_indices]
+    filtered_data = input_instance[active_feature_indices]
+    filtered_feature_names = [display_feature_names[i] for i in active_feature_indices]
+
+    # Create the SHAP explanation object with only the active features
+    shap_explanation = shap.Explanation(values=filtered_shap_values,
+                                          base_values=explainer.expected_value,
+                                          data=filtered_data,
+                                          feature_names=filtered_feature_names)
     
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots()
     shap.plots.waterfall(shap_explanation, max_display=14, show=False)
-    plt.tight_layout()
+    ax.grid(axis='y', color='grey', linestyle='--', linewidth=0.5, zorder=0)
     st.pyplot(fig)
 
+    # --- Conditional Lifestyle Recommendations using a dropdown ---
     st.markdown("---")
-    if explanation_class > 0:
-        if st.selectbox("Would you like recommendations based on this explanation?", ("No, thanks", "Yes, show recommendations"), key=f"reco_{explanation_class}") == "Yes, show recommendations":
-            st.subheader(f'Personalized Recommendations to Reduce Risk of "{class_to_explain_label}"')
-            feature_shap_values = dict(zip(st.session_state.input_df.columns, shap_values_instance))
-            lifestyle_advice = {
-                'trestbps': "Your **Resting Blood Pressure** is a key risk factor. Consider reducing salt intake, increasing physical activity, and managing stress.",
-                'chol': "High **Cholesterol** is significantly increasing your risk. Focus on a diet rich in fruits, vegetables, and whole grains.",
-                'oldpeak': "**ST Depression (oldpeak)** is a strong indicator of risk. Please discuss this clinical finding with your doctor.",
-                'exang': "**Exercise-Induced Angina** is a critical risk factor. Consult a cardiologist to understand your exercise limits.",
-                'ca': "The **Number of Major Vessels Blocked** is a major factor. This requires medical intervention. Please follow your cardiologist's advice.",
-            }
-            top_risk_factors = sorted(feature_shap_values.items(), key=lambda item: item[1], reverse=True)
-            recommendations_found = 0
-            for feature, shap_value in top_risk_factors:
-                if shap_value > 0.05 and feature in lifestyle_advice:
-                    st.warning(f"💡 **Recommendation:** {lifestyle_advice[feature]}")
-                    recommendations_found += 1
-                    if recommendations_found >= 3: break
-            if recommendations_found == 0:
-                st.info("For this risk class, no single factor stands out as a primary driver. The risk is likely due to a combination of factors. Please consult a healthcare professional.")
-    else:
-        st.success("✅ The explanation for the No/Low Risk category shows factors that are contributing positively to your health profile.")
+    show_recommendations = st.selectbox(
+        "Would you like to see recommendations to reduce your risk?",
+        ("Select an option...", "Yes, show recommendations", "No, thanks"),
+        key='recommendations_selectbox'
+    )
+
+    if show_recommendations == "Yes, show recommendations":
+        st.subheader('Personalized Lifestyle Recommendations')
+
+        # Get SHAP values and feature names from session state
+        shap_values_for_prediction = st.session_state.shap_values[0]
+        # Use original feature names for logic
+        feature_names = st.session_state.input_df.columns
+        feature_shap_values = dict(zip(feature_names, shap_values_for_prediction))
+
+        # Dictionary of lifestyle advice (uses original feature names as keys)
+        lifestyle_advice = {
+            'trestbps': "Your **Resting Blood Pressure** is a key risk factor. Consider reducing salt intake, increasing physical activity, and managing stress.",
+            'chol': "High **Cholesterol** is significantly increasing your risk. Focus on a diet rich in fruits, vegetables, and whole grains, and reduce saturated and trans fats.",
+            'thalch': "Your **Maximum Heart Rate** achieved was lower than expected. Regular cardiovascular exercise (like brisk walking, jogging, or cycling) can help improve heart fitness.",
+            'oldpeak': "**ST Depression (oldpeak)** is a strong indicator of risk. This is a clinical finding; please discuss its significance and a management plan with your doctor.",
+            'exang': "**Exercise-Induced Angina** is a critical risk factor. It's essential to consult a cardiologist to understand your exercise limits and treatment options.",
+            'fbs': "Your **Fasting Blood Sugar** level is contributing to your risk. Monitor your sugar intake and focus on a balanced diet. Consult a doctor to screen for diabetes.",
+            'ca': "The **Number of Major Vessels Blocked** is a major factor. This requires medical intervention. Please follow your cardiologist's advice closely.",
+        }
+
+        # Identify and display advice for the top risk factors
+        top_risk_factors = sorted(feature_shap_values.items(), key=lambda item: item[1], reverse=True)
+        recommendations_found = 0
+        
+        for feature, shap_value in top_risk_factors:
+            if shap_value > 0 and feature in lifestyle_advice:
+                st.warning(f"💡 **Recommendation:** {lifestyle_advice[feature]}")
+                recommendations_found += 1
+                if recommendations_found >= 3:
+                    break
+        
+        if recommendations_found == 0:
+            st.success("Your key metrics appear to be in a healthy range. Keep up the great work with a balanced diet and regular exercise!")
 
 # --- FAQ Section ---
 st.subheader("❓ Understanding the Health Variables")
 st.markdown("---")
+
 with st.expander("What is Resting Blood Pressure (trestbps)?"):
-    st.write("The pressure in your arteries when your heart rests between beats. A normal reading is less than 120/80 mm Hg.")
+    st.write("""
+    This is the pressure in your arteries when your heart is at rest, between beats, measured in mm Hg.
+    - **Health Impact:** Consistently high blood pressure (hypertension) can damage your arteries and heart, increasing the risk of heart attack and stroke.
+    - **Nominal Range:** Less than 120/80 mm Hg.
+    """)
+
 with st.expander("What is Serum Cholesterol (chol)?"):
-    st.write("The total amount of cholesterol in your blood. Desirable levels are less than 200 mg/dL.")
+    st.write("""
+    This is the total amount of cholesterol in your blood, measured in mg/dL.
+    - **Health Impact:** High levels can lead to plaque buildup in your arteries (atherosclerosis), which narrows them and increases the risk of blood clots and heart attacks.
+    - **Nominal Range:** Less than 200 mg/dL.
+    """)
+
+with st.expander("What is Fasting Blood Sugar (fbs)?"):
+    st.write("""
+    This measures your blood glucose level after fasting for at least 8 hours.
+    - **Health Impact:** High levels can indicate prediabetes or diabetes, which are major risk factors for heart disease and can damage nerves and blood vessels over time.
+    - **Nominal Range:** Less than 100 mg/dL.
+    """)
+
+with st.expander("What is Maximum Heart Rate Achieved (thalch)?"):
+    st.write("""
+    This is the highest your heart rate reached during a stress test.
+    - **Health Impact:** A lower-than-expected maximum heart rate can indicate coronary artery disease, as the heart is unable to respond properly to the demand for more oxygen.
+    - **Nominal Range:** Varies with age. A common estimate is 220 minus your age.
+    """)
+
+with st.expander("What is Exercise Induced Angina (exang)?"):
+    st.write("""
+    This indicates whether you experienced chest pain (angina) during a physical stress test.
+    - **Health Impact:** Angina during exercise is a classic sign of coronary artery disease, meaning the heart muscle isn't getting enough oxygen-rich blood when it's working hard.
+    - **Nominal Range:** False (No chest pain).
+    """)
+
 with st.expander("What is ST Depression (oldpeak)?"):
-    st.write("A finding on an ECG during a stress test that can indicate poor blood flow to the heart. A value of 0 is normal.")
+    st.write("""
+    This measures a specific change on an electrocardiogram (ECG) during a stress test compared to the resting state.
+    - **Health Impact:** Significant ST depression is a strong indicator that a part of the heart is not receiving enough blood flow, suggesting potential blockages.
+    - **Nominal Range:** 0 (No depression).
+    """)
+    
 with st.expander("What is the Number of major vessels (ca)?"):
-    st.write("The number of major coronary arteries (0-4) that appear blocked in an imaging test. 0 is the ideal value.")
+    st.write("""
+    This is the number of major coronary arteries (0-3) that appear blocked or narrowed during a fluoroscopy test.
+    - **Health Impact:** The higher the number, the more widespread the coronary artery disease, directly correlating with a higher risk of a future heart attack.
+    - **Nominal Range:** 0 (No major vessels appear blocked).
+    """)
+
 with st.expander("What is Thalassemia (thal)?"):
-    st.write("A result from a thallium stress test indicating blood flow. A 'reversible defect' is a critical finding suggesting a blockage.")
+    st.write("""
+    This refers to the result of a thallium stress test, which shows blood flow to the heart muscle.
+    - **Normal:** Blood flow is normal.
+    - **Fixed Defect:** A permanent area of damage, likely from a previous heart attack.
+    - **Reversible Defect:** A temporary blood flow problem that occurs during exercise but not at rest, indicating a blockage.
+    - **Health Impact:** A "reversible defect" is a critical finding that points to significant coronary artery disease.
+    """)

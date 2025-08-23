@@ -38,13 +38,25 @@ def reset_state():
 # --- Page Configuration ---
 st.set_page_config(page_title="Heart Disease Prediction", layout="wide")
 
+
+# --- App UI ---
 # --- Title and Reset Button ---
-col1, col2 = st.columns([4, 1])
-with col1:
+title_col, reset_col = st.columns([4, 1])
+with title_col:
     st.title('🩺 Heart Disease Prediction App')
-with col2:
-    if st.button('Reset App State', key='reset_button'):
+with reset_col:
+    if st.button('Reset App State', key='reset_button_app'):
         reset_state()
+
+
+# --- SOCIAL/REPO LINKS ---
+btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 3]) # Added columns for buttons
+with btn_col1:
+    st.markdown('<a href="https://www.linkedin.com/in/subhranil-das/" target="_blank" class="button">LinkedIn</a>', unsafe_allow_html=True)
+with btn_col2:
+    st.markdown('<a href="https://github.com/dassubhranil/" target="_blank" class="button">GitHub</a>', unsafe_allow_html=True)
+
+st.write("---") # Separator
 
 st.write("""
 This app uses a machine learning model to predict the likelihood of a patient having heart disease.

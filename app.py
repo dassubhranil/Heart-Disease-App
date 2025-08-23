@@ -48,62 +48,122 @@ def load_model_and_explainer():
         explainer = shap.TreeExplainer(model)
         return model, explainer
     except FileNotFoundError:
-        st.error("Model file not found.")
+        st.error("Model file not found. Please ensure 'heart_disease_model.joblib' is in the same directory.")
         return None, None
 
 model, explainer = load_model_and_explainer()
 
-# --- Initialize Session State ---
+# --- NEW: Define Preset Patient Data ---
+# These are example profiles representing different levels of risk.
+PRESET_PATIENTS = {
+    "Select a preset profile...": None,
+    "Class 0: No/Low Risk Profile": {
+        'age': 45, 'sex': 'Female', 'cp': 'asymptomatic', 'trestbps': 120, 'chol': 200,
+        'fbs': 0, 'restecg': 'normal', 'thalch': 170, 'exang': 0, 'oldpeak': 0.5,
+        'slope': 'upsloping', 'ca': 0, 'thal': 'normal'
+    },
+    "Class 1: Mild Risk Profile": {
+        'age': 55, 'sex': 'Male', 'cp': 'atypical angina', 'trestbps': 130, 'chol': 240,
+        'fbs': 0, 'restecg': 'st-t abnormality', 'thalch': 150, 'exang': 0, 'oldpeak': 1.0,
+        'slope': 'flat', 'ca': 0, 'thal': 'normal'
+    },
+    "Class 2: Moderate Risk Profile": {
+        'age': 60, 'sex': 'Male', 'cp': 'non-anginal', 'trestbps': 140, 'chol': 260,
+        'fbs': 1, 'restecg': 'lv hypertrophy', 'thalch': 140, 'exang': 1, 'oldpeak': 2.0,
+        'slope': 'flat', 'ca': 1, 'thal': 'reversable defect'
+    },
+    "Class 3: High Risk Profile": {
+        'age': 65, 'sex': 'Male', 'cp': 'asymptomatic', 'trestbps': 150, 'chol': 280,
+        'fbs': 1, 'restecg': 'lv hypertrophy', 'thalch': 130, 'exang': 1, 'oldpeak': 3.5,
+        'slope': 'flat', 'ca': 2, 'thal': 'reversable defect'
+    },
+    "Class 4: Very High Risk Profile": {
+        'age': 68, 'sex': 'Male', 'cp': 'asymptomatic', 'trestbps': 160, 'chol': 300,
+        'fbs': 1, 'restecg': 'lv hypertrophy', 'thalch': 120, 'exang': 1, 'oldpeak': 4.0,
+        'slope': 'downsloping', 'ca': 3, 'thal': 'reversable defect'
+    }
+}
+
+# --- MODIFIED: Initialize Session State for all inputs ---
 if 'prediction_made' not in st.session_state:
     st.session_state.prediction_made = False
+
+# Default patient state
+default_patient = {
+    'age': 55, 'sex': 'Male', 'cp': 'asymptomatic', 'trestbps': 130, 'chol': 240,
+    'fbs': 0, 'restecg': 'normal', 'thalch': 150, 'exang': 0, 'oldpeak': 1.0,
+    'slope': 'flat', 'ca': 0, 'thal': 'normal'
+}
+for key, value in default_patient.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
 # --- App State Management Functions ---
 def reset_state():
     st.session_state.prediction_made = False
+    # Reset inputs to default values
+    for key, value in default_patient.items():
+        st.session_state[key] = value
+    # Clear prediction-related keys
     keys_to_delete = ['input_df', 'prediction', 'prediction_proba', 'shap_values']
     for key in keys_to_delete:
         if key in st.session_state:
             del st.session_state[key]
 
+# --- NEW: Callback function to update inputs from preset ---
+def update_inputs_from_preset():
+    preset_key = st.session_state.get('preset_selector', "Select a preset profile...")
+    preset_data = PRESET_PATIENTS.get(preset_key)
+    if preset_data:
+        for key, value in preset_data.items():
+            st.session_state[key] = value
+
 # --- App UI ---
 # --- Title, Links, and Reset Button ---
 title_col, buttons_col = st.columns([3, 2])
-
 with title_col:
     st.title('🩺 Heart Disease Prediction App')
-
 with buttons_col:
-    # Use columns with a small gap to group buttons tightly
     col1, col2, col3 = st.columns([1, 1, 1], gap="small")
     with col1:
         st.markdown('<a href="https://linkedin.com/in/subhranil-das" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3N2Zz4="> LinkedIn</a>', unsafe_allow_html=True)
     with col2:
         st.markdown('<a href="https://github.com/dassubhranil" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
     with col3:
-        if st.button('Reset', key='reset_button_app', use_container_width=True):
-            reset_state()
+        if st.button('Reset', key='reset_button_app', use_container_width=True, on_click=reset_state):
+            pass # The on_click handles the logic
 
-st.write("---") # Separator
+st.write("---")
 
-# ... (The rest of your heart disease app code remains the same) ...
 with st.expander("Enter Patient Data", expanded=True):
+    # --- NEW: Preset Selector Button ---
+    st.selectbox(
+        "Load Preset Patient Profile (by Disease Class)",
+        options=list(PRESET_PATIENTS.keys()),
+        key='preset_selector',
+        on_change=update_inputs_from_preset,
+        help="Select a typical patient profile to see how the model predicts different risk levels."
+    )
+    st.write("---")
+    
+    # --- MODIFIED: All input widgets now use 'key' to link to session_state ---
     col1, col2, col3 = st.columns(3)
     with col1:
-        age = st.slider('Age', 29, 77, 55)
-        sex = st.selectbox('Sex', ('Male', 'Female'))
-        cp = st.selectbox('Chest Pain Type (cp)', ('typical angina', 'atypical angina', 'non-anginal', 'asymptomatic'))
-        fbs = st.selectbox('Fasting Blood Sugar < 120 mg/dl (fbs)', (0, 1), format_func=lambda x: 'True' if x == 1 else 'False')
+        age = st.slider('Age', 29, 77, key='age')
+        sex = st.selectbox('Sex', ('Male', 'Female'), key='sex')
+        cp = st.selectbox('Chest Pain Type (cp)', ('typical angina', 'atypical angina', 'non-anginal', 'asymptomatic'), key='cp')
+        fbs = st.selectbox('Fasting Blood Sugar > 120 mg/dl (fbs)', (0, 1), format_func=lambda x: 'True' if x == 1 else 'False', key='fbs')
     with col2:
-        trestbps = st.slider('Resting Blood Pressure (trestbps)', 94, 200, 130)
-        chol = st.slider('Serum Cholesterol (chol)', 126, 564, 240)
-        restecg = st.selectbox('Resting ECG (restecg)', ('normal', 'st-t abnormality', 'lv hypertrophy'))
-        exang = st.selectbox('Exercise Induced Angina (exang)', (0, 1), format_func=lambda x: 'Yes' if x == 1 else 'No')
+        trestbps = st.slider('Resting Blood Pressure (trestbps)', 94, 200, key='trestbps')
+        chol = st.slider('Serum Cholesterol (chol)', 126, 564, key='chol')
+        restecg = st.selectbox('Resting ECG (restecg)', ('normal', 'st-t abnormality', 'lv hypertrophy'), key='restecg')
+        exang = st.selectbox('Exercise Induced Angina (exang)', (0, 1), format_func=lambda x: 'Yes' if x == 1 else 'No', key='exang')
     with col3:
-        thalch = st.slider('Max Heart Rate Achieved (thalch)', 71, 202, 150)
-        oldpeak = st.slider('ST depression (oldpeak)', 0.0, 6.2, 1.0)
-        slope = st.selectbox('Slope of ST segment (slope)', ('upsloping', 'flat', 'downsloping'))
-        ca = st.slider('Number of major vessels (ca)', 0, 3, 0)
-        thal = st.selectbox('Thalassemia (thal)', ('normal', 'fixed defect', 'reversable defect'))
+        thalch = st.slider('Max Heart Rate Achieved (thalch)', 71, 202, key='thalch')
+        oldpeak = st.slider('ST depression (oldpeak)', 0.0, 6.2, key='oldpeak', step=0.1)
+        slope = st.selectbox('Slope of ST segment (slope)', ('upsloping', 'flat', 'downsloping'), key='slope')
+        ca = st.slider('Number of major vessels (ca)', 0, 4, key='ca')
+        thal = st.selectbox('Thalassemia (thal)', ('normal', 'fixed defect', 'reversable defect'), key='thal')
 
 def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, oldpeak, slope, ca, thal):
     model_columns = [
@@ -150,10 +210,16 @@ def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, old
         
     return input_data
 
-if st.button('Predict Heart Disease Risk', key='predict_button'):
-    reset_state()
+if st.button('Predict Heart Disease Risk', key='predict_button', use_container_width=True):
+    st.session_state.prediction_made = False # Reset before new prediction
     if model is not None:
-        st.session_state.input_df = process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, oldpeak, slope, ca, thal)
+        st.session_state.input_df = process_input(
+            st.session_state.age, st.session_state.sex, st.session_state.cp,
+            st.session_state.trestbps, st.session_state.chol, st.session_state.fbs,
+            st.session_state.restecg, st.session_state.thalch, st.session_state.exang,
+            st.session_state.oldpeak, st.session_state.slope, st.session_state.ca,
+            st.session_state.thal
+        )
         st.session_state.prediction = model.predict(st.session_state.input_df)
         st.session_state.prediction_proba = model.predict_proba(st.session_state.input_df)
         st.session_state.shap_values = explainer.shap_values(st.session_state.input_df)
@@ -161,19 +227,25 @@ if st.button('Predict Heart Disease Risk', key='predict_button'):
     else:
         st.warning("Model is not loaded.")
 
+# --- The rest of the code for displaying results remains the same ---
 if st.session_state.prediction_made:
     st.subheader('Prediction Result')
-    if st.session_state.prediction[0] == 1:
-        st.error(f'High Risk (Probability: {st.session_state.prediction_proba[0][1]*100:.2f}%)')
+    is_high_risk = st.session_state.prediction[0] == 1
+    
+    if is_high_risk:
+        probability = st.session_state.prediction_proba[0][1] * 100
+        st.error(f'**High Risk** of Heart Disease (Probability: {probability:.2f}%)')
     else:
-        st.success(f'Low Risk (Probability: {st.session_state.prediction_proba[0][0]*100:.2f}%)')
+        # For low risk, we show the probability of NOT having the disease (class 0)
+        probability = st.session_state.prediction_proba[0][0] * 100
+        st.success(f'**Low Risk** of Heart Disease (Probability: {probability:.2f}%)')
 
     st.subheader('Prediction Explanation')
-    st.write("The plot below shows how each feature contributed to the final prediction. Features in red increase the risk score, while those in blue decrease it.")
+    st.write("The plot below shows how each feature contributed to the final prediction. Features in **red** increase the risk score, while those in **blue** decrease it.")
     
     feature_name_map = {
         'age': 'Age', 'trestbps': 'Resting Blood Pressure', 'chol': 'Cholesterol',
-        'fbs': 'Fasting Blood Sugar < 120 mg/dl', 'thalch': 'Max Heart Rate Achieved',
+        'fbs': 'Fasting Blood Sugar > 120 mg/dl', 'thalch': 'Max Heart Rate Achieved',
         'exang': 'Exercise Induced Angina', 'oldpeak': 'ST Depression',
         'ca': 'Number of Major Vessels', 'sex_Male': 'Sex: Male',
         'cp_atypical angina': 'Chest Pain: Atypical Angina', 'cp_non-anginal': 'Chest Pain: Non-Anginal',
@@ -186,27 +258,28 @@ if st.session_state.prediction_made:
     display_feature_names = [feature_name_map.get(f, f) for f in st.session_state.input_df.columns]
     
     # --- FIXED SHAP PLOT LOGIC ---
-    # Get the input data for the current prediction
     input_instance = st.session_state.input_df.iloc[0]
+    shap_values_instance = st.session_state.shap_values[1] if is_high_risk and isinstance(st.session_state.shap_values, list) else st.session_state.shap_values[0]
 
-    # Find the indices of features that have a non-zero value
-    active_feature_indices = [i for i, val in enumerate(input_instance) if val != 0]
-
-    # Filter the SHAP values, data, and feature names to only include active features
-    filtered_shap_values = st.session_state.shap_values[0][active_feature_indices]
+    # Filter to show only active (non-zero for one-hot) and impactful features
+    active_feature_indices = [i for i, val in enumerate(input_instance) if val != 0 or st.session_state.input_df.columns[i] in ['age', 'trestbps', 'chol', 'thalch', 'oldpeak']]
+    
+    filtered_shap_values = shap_values_instance[active_feature_indices]
     filtered_data = input_instance[active_feature_indices]
     filtered_feature_names = [display_feature_names[i] for i in active_feature_indices]
 
-    # Create the SHAP explanation object with only the active features
-    shap_explanation = shap.Explanation(values=filtered_shap_values,
-                                          base_values=explainer.expected_value,
-                                          data=filtered_data,
-                                          feature_names=filtered_feature_names)
+    shap_explanation = shap.Explanation(
+        values=filtered_shap_values,
+        base_values=explainer.expected_value[1] if is_high_risk and isinstance(explainer.expected_value, (list, tuple)) else explainer.expected_value,
+        data=filtered_data,
+        feature_names=filtered_feature_names
+    )
     
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 8))
     shap.plots.waterfall(shap_explanation, max_display=14, show=False)
-    ax.grid(axis='y', color='grey', linestyle='--', linewidth=0.5, zorder=0)
+    plt.tight_layout()
     st.pyplot(fig)
+
 
     # --- Conditional Lifestyle Recommendations using a dropdown ---
     st.markdown("---")
@@ -219,13 +292,9 @@ if st.session_state.prediction_made:
     if show_recommendations == "Yes, show recommendations":
         st.subheader('Personalized Lifestyle Recommendations')
 
-        # Get SHAP values and feature names from session state
-        shap_values_for_prediction = st.session_state.shap_values[0]
-        # Use original feature names for logic
         feature_names = st.session_state.input_df.columns
-        feature_shap_values = dict(zip(feature_names, shap_values_for_prediction))
+        feature_shap_values = dict(zip(feature_names, shap_values_instance))
 
-        # Dictionary of lifestyle advice (uses original feature names as keys)
         lifestyle_advice = {
             'trestbps': "Your **Resting Blood Pressure** is a key risk factor. Consider reducing salt intake, increasing physical activity, and managing stress.",
             'chol': "High **Cholesterol** is significantly increasing your risk. Focus on a diet rich in fruits, vegetables, and whole grains, and reduce saturated and trans fats.",
@@ -236,7 +305,6 @@ if st.session_state.prediction_made:
             'ca': "The **Number of Major Vessels Blocked** is a major factor. This requires medical intervention. Please follow your cardiologist's advice closely.",
         }
 
-        # Identify and display advice for the top risk factors
         top_risk_factors = sorted(feature_shap_values.items(), key=lambda item: item[1], reverse=True)
         recommendations_found = 0
         
@@ -298,7 +366,7 @@ with st.expander("What is ST Depression (oldpeak)?"):
     
 with st.expander("What is the Number of major vessels (ca)?"):
     st.write("""
-    This is the number of major coronary arteries (0-3) that appear blocked or narrowed during a fluoroscopy test.
+    This is the number of major coronary arteries (0-4) that appear blocked or narrowed during a fluoroscopy test.
     - **Health Impact:** The higher the number, the more widespread the coronary artery disease, directly correlating with a higher risk of a future heart attack.
     - **Nominal Range:** 0 (No major vessels appear blocked).
     """)

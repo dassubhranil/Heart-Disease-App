@@ -184,6 +184,11 @@ if st.session_state.prediction_made:
     
     fig, ax = plt.subplots()
     shap.plots.waterfall(shap_explanation, max_display=14, show=False)
+    
+    # Add horizontal grid lines for better readability
+    for i in range(len(ax.get_yticklabels())):
+        ax.axhline(i, color='grey', linestyle='--', linewidth=0.5, zorder=0)
+        
     st.pyplot(fig)
     
     # --- Conditional Lifestyle Recommendations using a dropdown ---

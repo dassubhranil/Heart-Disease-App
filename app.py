@@ -244,7 +244,7 @@ if st.session_state.prediction_made:
             if shap_value > 0 and feature in lifestyle_advice:
                 st.warning(f"💡 **Recommendation:** {lifestyle_advice[feature]}")
                 recommendations_found += 1
-                if recommendations_found >= 3:
+                if recommendations_found >= 7:
                     break
         
         if recommendations_found == 0:

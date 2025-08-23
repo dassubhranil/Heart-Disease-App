@@ -190,12 +190,11 @@ if st.session_state.prediction_made:
     
     st.markdown("---")
     
-    # --- MODIFIED: User selects which class to explain ---
     explanation_class = st.selectbox(
         "Select a risk class to see its explanation:",
         options=list(CLASS_LABELS.keys()),
         format_func=lambda x: CLASS_LABELS[x],
-        index=int(predicted_class),  # FIX: Cast numpy int to standard python int
+        index=int(predicted_class),
         key='explanation_class_selector'
     )
     class_to_explain_label = CLASS_LABELS.get(explanation_class)
@@ -217,15 +216,16 @@ if st.session_state.prediction_made:
     }
     display_feature_names = [feature_name_map.get(f, f) for f in st.session_state.input_df.columns]
     
-    input_instance = st.session_state.input_df.iloc[0]
-
-    # --- CRITICAL: Select SHAP values for the USER-SELECTED class ---
     shap_values_instance = st.session_state.shap_values[explanation_class][0]
     base_value = explainer.expected_value[explanation_class]
 
+    # --- FIX: Create a more robust SHAP Explanation object ---
+    # The waterfall plot doesn't require the original data values, so we can omit them
+    # to prevent potential type/shape mismatch errors.
     shap_explanation = shap.Explanation(
-        values=shap_values_instance, base_values=base_value,
-        data=input_instance.values, feature_names=display_feature_names
+        values=shap_values_instance, 
+        base_values=base_value,
+        feature_names=display_feature_names
     )
     
     fig, ax = plt.subplots(figsize=(10, 8))

@@ -41,6 +41,8 @@ st.set_page_config(page_title="Heart Disease Prediction", layout="wide")
 
 # --- App UI ---
 # --- Title and Reset Button ---
+title_col, links_col = st.columns([2, 1])
+
 with title_col:
     st.title('🩺 Heart Disease Prediction App')
 

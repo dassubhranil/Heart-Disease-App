@@ -5,7 +5,6 @@
 [![XGBoost](https://img.shields.io/badge/XGBoost-ML%20Model-orange.svg?logo=tree&logoColor=white)](https://xgboost.readthedocs.io/)  
 [![SHAP](https://img.shields.io/badge/Explainable%20AI-SHAP-7A288A.svg)](https://shap.readthedocs.io/)  
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
-[![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/dassubhranil)
 
 
 An interactive web application built with Streamlit to predict the risk of heart disease based on patient data. This app uses a pre-trained XGBoost model and provides model explanations using SHAP (SHapley Additive exPlanations) to ensure transparency and interpretability.

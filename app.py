@@ -58,14 +58,6 @@ with links_col:
         if st.button('Reset', key='reset_button_app', use_container_width=True):
             reset_state()
 
-
-# --- SOCIAL/REPO LINKS ---
-btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 3]) # Added columns for buttons
-with btn_col1:
-    st.markdown('<a href="https://www.linkedin.com/in/subhranil-das/" target="_blank" class="button">LinkedIn</a>', unsafe_allow_html=True)
-with btn_col2:
-    st.markdown('<a href="https://github.com/dassubhranil/" target="_blank" class="button">GitHub</a>', unsafe_allow_html=True)
-
 st.write("---") # Separator
 
 st.write("""

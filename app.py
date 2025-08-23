@@ -52,7 +52,6 @@ def load_model_and_explainer():
     """Loads the pre-trained model and SHAP explainer."""
     try:
         model = joblib.load('heart_disease_model.joblib')
-        # For multiclass models, the explainer needs to know about the model's structure
         explainer = shap.TreeExplainer(model)
         return model, explainer
     except FileNotFoundError:
@@ -63,36 +62,6 @@ def load_model_and_explainer():
         return None, None
 
 model, explainer = load_model_and_explainer()
-
-# --- Preset Patient Data for Disease Classes 0-4 ---
-PRESET_PATIENTS = {
-    "Select a preset profile...": None,
-    "Class 0: No/Low Risk Profile": {
-        'age': 45, 'sex': 'Female', 'cp': 'asymptomatic', 'trestbps': 120, 'chol': 200,
-        'fbs': 0, 'restecg': 'normal', 'thalch': 170, 'exang': 0, 'oldpeak': 0.5,
-        'slope': 'upsloping', 'ca': 0, 'thal': 'normal'
-    },
-    "Class 1: Mild Risk Profile": {
-        'age': 55, 'sex': 'Male', 'cp': 'atypical angina', 'trestbps': 130, 'chol': 240,
-        'fbs': 0, 'restecg': 'st-t abnormality', 'thalch': 150, 'exang': 0, 'oldpeak': 1.0,
-        'slope': 'flat', 'ca': 0, 'thal': 'normal'
-    },
-    "Class 2: Moderate Risk Profile": {
-        'age': 60, 'sex': 'Male', 'cp': 'non-anginal', 'trestbps': 140, 'chol': 260,
-        'fbs': 1, 'restecg': 'lv hypertrophy', 'thalch': 140, 'exang': 1, 'oldpeak': 2.0,
-        'slope': 'flat', 'ca': 1, 'thal': 'reversable defect'
-    },
-    "Class 3: High Risk Profile": {
-        'age': 65, 'sex': 'Male', 'cp': 'asymptomatic', 'trestbps': 150, 'chol': 280,
-        'fbs': 1, 'restecg': 'lv hypertrophy', 'thalch': 130, 'exang': 1, 'oldpeak': 3.5,
-        'slope': 'flat', 'ca': 2, 'thal': 'reversable defect'
-    },
-    "Class 4: Very High Risk Profile": {
-        'age': 68, 'sex': 'Male', 'cp': 'asymptomatic', 'trestbps': 160, 'chol': 300,
-        'fbs': 1, 'restecg': 'lv hypertrophy', 'thalch': 120, 'exang': 1, 'oldpeak': 4.0,
-        'slope': 'downsloping', 'ca': 3, 'thal': 'reversable defect'
-    }
-}
 
 # --- Initialize Session State for all inputs ---
 if 'prediction_made' not in st.session_state:
@@ -118,14 +87,6 @@ def reset_state():
         if key in st.session_state:
             del st.session_state[key]
 
-def update_inputs_from_preset():
-    """Callback to update UI widgets from a selected preset."""
-    preset_key = st.session_state.get('preset_selector', "Select a preset profile...")
-    preset_data = PRESET_PATIENTS.get(preset_key)
-    if preset_data:
-        for key, value in preset_data.items():
-            st.session_state[key] = value
-
 # --- UI Header ---
 title_col, buttons_col = st.columns([3, 2])
 with title_col:
@@ -136,7 +97,7 @@ with buttons_col:
     with col1:
         st.markdown('<a href="https://linkedin.com/in/subhranil-das" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3NXZz4="> LinkedIn</a>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<a href="https://github.com/dassubhranil" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
+        st.markdown('<a href="https://github.com/dassubhranil" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS4nNjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
     with col3:
         st.button('Reset Inputs', key='reset_button_app', on_click=reset_state)
 
@@ -144,15 +105,6 @@ st.write("---")
 
 # --- UI Input Section ---
 with st.expander("Enter Patient Data", expanded=True):
-    st.selectbox(
-        "Load Preset Patient Profile (by Disease Class)",
-        options=list(PRESET_PATIENTS.keys()),
-        key='preset_selector',
-        on_change=update_inputs_from_preset,
-        help="Select a typical patient profile to see how the model predicts different risk levels."
-    )
-    st.write("---")
-    
     col1, col2, col3 = st.columns(3)
     with col1:
         st.slider('Age', 29, 77, key='age')
@@ -235,9 +187,22 @@ if st.session_state.prediction_made:
         st.success(f'Predicted Risk Level: **{class_label}** (Confidence: {prediction_probability:.2f}%)')
     else:
         st.error(f'Predicted Risk Level: **{class_label}** (Confidence: {prediction_probability:.2f}%)')
+    
+    st.markdown("---")
+    
+    # --- MODIFIED: User selects which class to explain ---
+    explanation_class = st.selectbox(
+        "Select a risk class to see its explanation:",
+        options=list(CLASS_LABELS.keys()),
+        format_func=lambda x: CLASS_LABELS[x],
+        index=predicted_class,  # Default to the predicted class
+        key='explanation_class_selector'
+    )
+    class_to_explain_label = CLASS_LABELS.get(explanation_class)
 
-    st.subheader(f'Prediction Explanation for "{class_label}"')
-    st.write(f"This plot shows why the model predicted this specific risk class. Features in **red** increased the score towards this class, while features in **blue** decreased it.")
+
+    st.subheader(f'Explanation for "{class_to_explain_label}"')
+    st.write(f"This plot shows the factors pushing the prediction towards or away from this specific risk class.")
 
     feature_name_map = {
         'age': 'Age', 'trestbps': 'Resting Blood Pressure', 'chol': 'Cholesterol',
@@ -254,9 +219,9 @@ if st.session_state.prediction_made:
     
     input_instance = st.session_state.input_df.iloc[0]
 
-    # --- CRITICAL: Select SHAP values for the PREDICTED class ---
-    shap_values_instance = st.session_state.shap_values[predicted_class][0]
-    base_value = explainer.expected_value[predicted_class]
+    # --- CRITICAL: Select SHAP values for the USER-SELECTED class ---
+    shap_values_instance = st.session_state.shap_values[explanation_class][0]
+    base_value = explainer.expected_value[explanation_class]
 
     shap_explanation = shap.Explanation(
         values=shap_values_instance, base_values=base_value,
@@ -269,9 +234,9 @@ if st.session_state.prediction_made:
     st.pyplot(fig)
 
     st.markdown("---")
-    if predicted_class > 0:
-        if st.selectbox("Would you like recommendations?", ("No, thanks", "Yes, show recommendations")) == "Yes, show recommendations":
-            st.subheader('Personalized Lifestyle Recommendations')
+    if explanation_class > 0:
+        if st.selectbox("Would you like recommendations based on this explanation?", ("No, thanks", "Yes, show recommendations"), key=f"reco_{explanation_class}") == "Yes, show recommendations":
+            st.subheader(f'Personalized Recommendations to Reduce Risk of "{class_to_explain_label}"')
             feature_shap_values = dict(zip(st.session_state.input_df.columns, shap_values_instance))
             lifestyle_advice = {
                 'trestbps': "Your **Resting Blood Pressure** is a key risk factor. Consider reducing salt intake, increasing physical activity, and managing stress.",
@@ -288,9 +253,9 @@ if st.session_state.prediction_made:
                     recommendations_found += 1
                     if recommendations_found >= 3: break
             if recommendations_found == 0:
-                st.info("The model indicates elevated risk based on a combination of factors. Please consult a healthcare professional.")
+                st.info("For this risk class, no single factor stands out as a primary driver. The risk is likely due to a combination of factors. Please consult a healthcare professional.")
     else:
-        st.success("✅ Your profile aligns with the **No/Low Risk** category. Continue to maintain a balanced diet and regular exercise!")
+        st.success("✅ The explanation for the No/Low Risk category shows factors that are contributing positively to your health profile.")
 
 # --- FAQ Section ---
 st.subheader("❓ Understanding the Health Variables")
@@ -305,4 +270,3 @@ with st.expander("What is the Number of major vessels (ca)?"):
     st.write("The number of major coronary arteries (0-4) that appear blocked in an imaging test. 0 is the ideal value.")
 with st.expander("What is Thalassemia (thal)?"):
     st.write("A result from a thallium stress test indicating blood flow. A 'reversible defect' is a critical finding suggesting a blockage.")
-

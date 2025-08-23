@@ -39,40 +39,31 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # --- Load Trained Model and SHAP Explainer ---
-# Use st.cache_data for efficiency, so the model is loaded only once
 @st.cache_data
 def load_model_and_explainer():
-    """
-    Loads the saved machine learning model and the SHAP explainer from files.
-    """
     try:
         model = joblib.load('heart_disease_model.joblib')
         explainer = shap.TreeExplainer(model)
         return model, explainer
     except FileNotFoundError:
-        st.error("Model file not found. Please ensure 'heart_disease_model.joblib' is in the same directory.")
+        st.error("Model file not found.")
         return None, None
 
 model, explainer = load_model_and_explainer()
 
 # --- Initialize Session State ---
-# This is crucial to preserve the state across widget interactions.
 if 'prediction_made' not in st.session_state:
     st.session_state.prediction_made = False
 
 # --- App State Management Functions ---
 def reset_state():
-    """Resets the prediction state, clearing all results."""
     st.session_state.prediction_made = False
     keys_to_delete = ['input_df', 'prediction', 'prediction_proba', 'shap_values']
     for key in keys_to_delete:
         if key in st.session_state:
             del st.session_state[key]
-
-# --- Page Configuration ---
-st.set_page_config(page_title="Heart Disease Prediction", layout="wide")
-
 
 # --- App UI ---
 # --- Title, Links, and Reset Button ---
@@ -85,37 +76,28 @@ with buttons_col:
     # Use columns with a small gap to group buttons tightly
     col1, col2, col3 = st.columns([1, 1, 1], gap="small")
     with col1:
-        st.markdown('<a href="https://www.linkedin.com/in/subhranil-das/" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3N2Zz4="> LinkedIn</a>', unsafe_allow_html=True)
+        st.markdown('<a href="https://linkedin.com/in/your-profile" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3N2Zz4="> LinkedIn</a>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<a href="https://github.com/dassubhranil" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
+        st.markdown('<a href="https://github.com/your-username/heart-disease-app" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
     with col3:
         if st.button('Reset', key='reset_button_app', use_container_width=True):
             reset_state()
 
 st.write("---") # Separator
 
-st.write("""
-This app uses a machine learning model to predict the likelihood of a patient having heart disease.
-Expand the section below to enter patient details and get a prediction.
-""")
-
-# --- Create an Expander for User Inputs ---
+# ... (The rest of your heart disease app code remains the same) ...
 with st.expander("Enter Patient Data", expanded=True):
-    # Create columns for a cleaner layout
     col1, col2, col3 = st.columns(3)
-
     with col1:
         age = st.slider('Age', 29, 77, 55)
         sex = st.selectbox('Sex', ('Male', 'Female'))
         cp = st.selectbox('Chest Pain Type (cp)', ('typical angina', 'atypical angina', 'non-anginal', 'asymptomatic'))
         fbs = st.selectbox('Fasting Blood Sugar > 120 mg/dl (fbs)', (0, 1), format_func=lambda x: 'True' if x == 1 else 'False')
-
     with col2:
         trestbps = st.slider('Resting Blood Pressure (trestbps)', 94, 200, 130)
         chol = st.slider('Serum Cholesterol (chol)', 126, 564, 240)
         restecg = st.selectbox('Resting ECG (restecg)', ('normal', 'st-t abnormality', 'lv hypertrophy'))
         exang = st.selectbox('Exercise Induced Angina (exang)', (0, 1), format_func=lambda x: 'Yes' if x == 1 else 'No')
-
     with col3:
         thalch = st.slider('Max Heart Rate Achieved (thalch)', 71, 202, 150)
         oldpeak = st.slider('ST depression (oldpeak)', 0.0, 6.2, 1.0)
@@ -127,19 +109,14 @@ def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, old
     """
     Transforms raw user input into a one-hot encoded DataFrame that matches the model's training data.
     """
-    # Define the exact column order and names from the trained model
     model_columns = [
         'age', 'trestbps', 'chol', 'fbs', 'thalch', 'exang', 'oldpeak', 'ca',
         'sex_Male', 'cp_atypical angina', 'cp_non-anginal', 'cp_typical angina',
         'restecg_normal', 'restecg_st-t abnormality', 'slope_flat', 'slope_upsloping',
         'thal_normal', 'thal_reversable defect'
     ]
-
-    # Create a DataFrame with all columns initialized to 0
     input_data = pd.DataFrame(columns=model_columns)
     input_data.loc[0] = 0
-
-    # Fill in the numeric and boolean values
     input_data['age'] = age
     input_data['trestbps'] = trestbps
     input_data['chol'] = chol
@@ -148,55 +125,52 @@ def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, old
     input_data['exang'] = exang
     input_data['oldpeak'] = oldpeak
     input_data['ca'] = ca
-
-    # Set the correct one-hot encoded columns to 1 based on user selection
+    
+    # --- FIXED One-Hot Encoding Logic ---
     if sex == 'Male':
         input_data['sex_Male'] = 1
-    if cp != 'asymptomatic':
-        cp_col = 'cp_' + cp
-        if cp_col in input_data.columns:
-            input_data[cp_col] = 1
-    if restecg != 'lv hypertrophy':
-        restecg_col = 'restecg_' + restecg
-        if restecg_col in input_data.columns:
-            input_data[restecg_col] = 1
-    if slope != 'downsloping':
-        slope_col = 'slope_' + slope
-        if slope_col in input_data.columns:
-            input_data[slope_col] = 1
-    if thal != 'fixed defect':
-        thal_col = 'thal_' + thal
-        if thal_col in input_data.columns:
-            input_data[thal_col] = 1
-            
+    
+    if cp == 'typical angina':
+        input_data['cp_typical angina'] = 1
+    elif cp == 'atypical angina':
+        input_data['cp_atypical angina'] = 1
+    elif cp == 'non-anginal':
+        input_data['cp_non-anginal'] = 1
+        
+    if restecg == 'normal':
+        input_data['restecg_normal'] = 1
+    elif restecg == 'st-t abnormality':
+        input_data['restecg_st-t abnormality'] = 1
+        
+    if slope == 'upsloping':
+        input_data['slope_upsloping'] = 1
+    elif slope == 'flat':
+        input_data['slope_flat'] = 1
+
+    if thal == 'normal':
+        input_data['thal_normal'] = 1
+    elif thal == 'reversable defect':
+        input_data['thal_reversable defect'] = 1
+        
     return input_data
 
-# --- Prediction Logic ---
-# This part now only handles the calculation and stores results in the session state.
 if st.button('Predict Heart Disease Risk', key='predict_button'):
-    reset_state() # Reset previous results before making a new prediction
+    reset_state()
     if model is not None:
-        # Process inputs and store the DataFrame in session state
         st.session_state.input_df = process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, oldpeak, slope, ca, thal)
-        
-        # Make prediction and store results in session state
         st.session_state.prediction = model.predict(st.session_state.input_df)
         st.session_state.prediction_proba = model.predict_proba(st.session_state.input_df)
         st.session_state.shap_values = explainer.shap_values(st.session_state.input_df)
         st.session_state.prediction_made = True
     else:
-        st.warning("Model is not loaded. Cannot make a prediction.")
+        st.warning("Model is not loaded.")
 
-# --- Display Results and Recommendations ---
-# This block runs if a prediction has been made, preserving the display.
 if st.session_state.prediction_made:
     st.subheader('Prediction Result')
     if st.session_state.prediction[0] == 1:
-        st.error(f'High Risk of Heart Disease (Probability: {st.session_state.prediction_proba[0][1]*100:.2f}%)')
+        st.error(f'High Risk (Probability: {st.session_state.prediction_proba[0][1]*100:.2f}%)')
     else:
-        st.success(f'Low Risk of Heart Disease (Probability: {st.session_state.prediction_proba[0][0]*100:.2f}%)')
-
-    # Display SHAP Explanation plot
+        st.success(f'Low Risk (Probability: {st.session_state.prediction_proba[0][0]*100:.2f}%)')
     st.subheader('Prediction Explanation')
     st.write("The plot below shows how each feature contributed to the final prediction. Features in red increase the risk score, while those in blue decrease it.")
     
@@ -205,7 +179,7 @@ if st.session_state.prediction_made:
         'age': 'Age',
         'trestbps': 'Resting Blood Pressure',
         'chol': 'Cholesterol',
-        'fbs': 'Fasting Blood Sugar > 120 mg/dl',
+        'fbs': 'Fasting Blood Sugar < 120 mg/dl',
         'thalch': 'Max Heart Rate Achieved',
         'exang': 'Exercise Induced Angina',
         'oldpeak': 'ST Depression',

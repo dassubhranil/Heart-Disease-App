@@ -173,7 +173,7 @@ if st.session_state.prediction_made:
     
     feature_name_map = {
         'age': 'Age', 'trestbps': 'Resting Blood Pressure', 'chol': 'Cholesterol',
-        'fbs': 'Fasting Blood Sugar > 120 mg/dl', 'thalch': 'Max Heart Rate Achieved',
+        'fbs': 'Fasting Blood Sugar < 120 mg/dl', 'thalch': 'Max Heart Rate Achieved',
         'exang': 'Exercise Induced Angina', 'oldpeak': 'ST Depression',
         'ca': 'Number of Major Vessels', 'sex_Male': 'Sex: Male',
         'cp_atypical angina': 'Chest Pain: Atypical Angina', 'cp_non-anginal': 'Chest Pain: Non-Anginal',

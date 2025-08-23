@@ -92,7 +92,7 @@ with st.expander("Enter Patient Data", expanded=True):
         age = st.slider('Age', 29, 77, 55)
         sex = st.selectbox('Sex', ('Male', 'Female'))
         cp = st.selectbox('Chest Pain Type (cp)', ('typical angina', 'atypical angina', 'non-anginal', 'asymptomatic'))
-        fbs = st.selectbox('Fasting Blood Sugar > 120 mg/dl (fbs)', (0, 1), format_func=lambda x: 'True' if x == 1 else 'False')
+        fbs = st.selectbox('Fasting Blood Sugar < 120 mg/dl (fbs)', (0, 1), format_func=lambda x: 'True' if x == 1 else 'False')
     with col2:
         trestbps = st.slider('Resting Blood Pressure (trestbps)', 94, 200, 130)
         chol = st.slider('Serum Cholesterol (chol)', 126, 564, 240)

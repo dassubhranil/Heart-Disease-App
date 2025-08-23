@@ -76,9 +76,9 @@ with buttons_col:
     # Use columns with a small gap to group buttons tightly
     col1, col2, col3 = st.columns([1, 1, 1], gap="small")
     with col1:
-        st.markdown('<a href="https://linkedin.com/in/your-profile" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3N2Zz4="> LinkedIn</a>', unsafe_allow_html=True)
+        st.markdown('<a href="https://linkedin.com/in/subhranil-das" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTE5IDBoLTE0Yy0yLjc2MSAwLTUgMi4yMzktNSA1djE0YzAgMi43NjEgMi4yMzkgNSA1IDVoMTRjMi43NjIgMCA1LTIuMjM5IDUtNXYtMTRjMC0yLjc2MS0yLjIzOC01LTUtNXptLTExIDE5aC0zdi0xMWgzdjExem0tMS41LTEyLjI2OGMtLjk2NiAwLTEuNzUtLjc5LTEuNzUtMS43NjRzLjc4NC0xLjc2NCAxLjc1LTEuNzY0IDEuNzUuNzkgMS43NSAxLjc2NC0uNzgzIDEuNzY0LTEuNzUgMS43NjR6bTEzLjUgMTIuMjY4aC0zdi01LjYwNGMwLTMuMzY4LTQtMy4xMTMtNCAwdjUuNjA0aC0zdi0xMWgzdjEuNzY1YzEuMzk2LTIuNTg2IDctMi43NzcgNyAyLjQ3NnY2Ljc1OXoiLz48L3N2Zz4="> LinkedIn</a>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<a href="https://github.com/your-username/heart-disease-app" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
+        st.markdown('<a href="https://github.com/dassubhranil" target="_blank" class="icon-button"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjMuOTU3LS4yNjYgMS45ODMtLjM5OSAzLjAwMy0uNDA0IDEuMDIuMDA1IDEuMDIgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="> GitHub</a>', unsafe_allow_html=True)
     with col3:
         if st.button('Reset', key='reset_button_app', use_container_width=True):
             reset_state()
@@ -106,9 +106,6 @@ with st.expander("Enter Patient Data", expanded=True):
         thal = st.selectbox('Thalassemia (thal)', ('normal', 'fixed defect', 'reversable defect'))
 
 def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, oldpeak, slope, ca, thal):
-    """
-    Transforms raw user input into a one-hot encoded DataFrame that matches the model's training data.
-    """
     model_columns = [
         'age', 'trestbps', 'chol', 'fbs', 'thalch', 'exang', 'oldpeak', 'ca',
         'sex_Male', 'cp_atypical angina', 'cp_non-anginal', 'cp_typical angina',
@@ -126,7 +123,6 @@ def process_input(age, sex, cp, trestbps, chol, fbs, restecg, thalch, exang, old
     input_data['oldpeak'] = oldpeak
     input_data['ca'] = ca
     
-    # --- FIXED One-Hot Encoding Logic ---
     if sex == 'Male':
         input_data['sex_Male'] = 1
     
@@ -171,47 +167,47 @@ if st.session_state.prediction_made:
         st.error(f'High Risk (Probability: {st.session_state.prediction_proba[0][1]*100:.2f}%)')
     else:
         st.success(f'Low Risk (Probability: {st.session_state.prediction_proba[0][0]*100:.2f}%)')
+
     st.subheader('Prediction Explanation')
     st.write("The plot below shows how each feature contributed to the final prediction. Features in red increase the risk score, while those in blue decrease it.")
     
-    # Create a mapping for more readable feature names for the plot
     feature_name_map = {
-        'age': 'Age',
-        'trestbps': 'Resting Blood Pressure',
-        'chol': 'Cholesterol',
-        'fbs': 'Fasting Blood Sugar < 120 mg/dl',
-        'thalch': 'Max Heart Rate Achieved',
-        'exang': 'Exercise Induced Angina',
-        'oldpeak': 'ST Depression',
-        'ca': 'Number of Major Vessels',
-        'sex_Male': 'Sex: Male',
-        'cp_atypical angina': 'Chest Pain: Atypical Angina',
-        'cp_non-anginal': 'Chest Pain: Non-Anginal',
-        'cp_typical angina': 'Chest Pain: Typical Angina',
-        'restecg_normal': 'Resting ECG: Normal',
-        'restecg_st-t abnormality': 'Resting ECG: ST-T Abnormality',
-        'slope_flat': 'Slope: Flat',
-        'slope_upsloping': 'Slope: Upsloping',
-        'thal_normal': 'Thalassemia: Normal',
+        'age': 'Age', 'trestbps': 'Resting Blood Pressure', 'chol': 'Cholesterol',
+        'fbs': 'Fasting Blood Sugar > 120 mg/dl', 'thalch': 'Max Heart Rate Achieved',
+        'exang': 'Exercise Induced Angina', 'oldpeak': 'ST Depression',
+        'ca': 'Number of Major Vessels', 'sex_Male': 'Sex: Male',
+        'cp_atypical angina': 'Chest Pain: Atypical Angina', 'cp_non-anginal': 'Chest Pain: Non-Anginal',
+        'cp_typical angina': 'Chest Pain: Typical Angina', 'restecg_normal': 'Resting ECG: Normal',
+        'restecg_st-t abnormality': 'Resting ECG: ST-T Abnormality', 'slope_flat': 'Slope: Flat',
+        'slope_upsloping': 'Slope: Upsloping', 'thal_normal': 'Thalassemia: Normal',
         'thal_reversable defect': 'Thalassemia: Reversible Defect'
     }
     
-    # Create a list of new feature names, falling back to original if not in map
     display_feature_names = [feature_name_map.get(f, f) for f in st.session_state.input_df.columns]
     
-    shap_explanation = shap.Explanation(values=st.session_state.shap_values[0], 
-                                          base_values=explainer.expected_value, 
-                                          data=st.session_state.input_df.iloc[0],
-                                          feature_names=display_feature_names) # Use the new, readable names
+    # --- FIXED SHAP PLOT LOGIC ---
+    # Get the input data for the current prediction
+    input_instance = st.session_state.input_df.iloc[0]
+
+    # Find the indices of features that have a non-zero value
+    active_feature_indices = [i for i, val in enumerate(input_instance) if val != 0]
+
+    # Filter the SHAP values, data, and feature names to only include active features
+    filtered_shap_values = st.session_state.shap_values[0][active_feature_indices]
+    filtered_data = input_instance[active_feature_indices]
+    filtered_feature_names = [display_feature_names[i] for i in active_feature_indices]
+
+    # Create the SHAP explanation object with only the active features
+    shap_explanation = shap.Explanation(values=filtered_shap_values,
+                                          base_values=explainer.expected_value,
+                                          data=filtered_data,
+                                          feature_names=filtered_feature_names)
     
     fig, ax = plt.subplots()
     shap.plots.waterfall(shap_explanation, max_display=14, show=False)
-    
-    # Add horizontal grid lines using the standard matplotlib method
     ax.grid(axis='y', color='grey', linestyle='--', linewidth=0.5, zorder=0)
-        
     st.pyplot(fig)
-    
+
     # --- Conditional Lifestyle Recommendations using a dropdown ---
     st.markdown("---")
     show_recommendations = st.selectbox(

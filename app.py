@@ -4,6 +4,15 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 
+# --- Page Configuration ---
+st.set_page_config(
+    page_title="Heart Disease Prediction App",
+    page_icon="🩺",
+    layout="wide"
+)
+
+
+
 # --- STYLING for link buttons ---
 st.markdown("""
 <style>

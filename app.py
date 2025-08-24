@@ -87,8 +87,7 @@ with buttons_col:
     # Use columns with a small gap to group buttons tightly
     col1, col2, col3 = st.columns([1, 1, 1], gap="small")
     with col1:
-    st.markdown(f'<a href="https://linkedin.com/in/subhranil-das" target="_blank" style="text-decoration:none">{linkedin_svg} LinkedIn</a>', unsafe_allow_html=True)
-
+        st.markdown(f'<a href="https://linkedin.com/in/subhranil-das" target="_blank" style="text-decoration:none">{linkedin_svg} LinkedIn</a>', unsafe_allow_html=True)
     with col2:
         st.markdown(f'<a href="https://github.com/dassubhranil" target="_blank" style="text-decoration:none">{github_svg} GitHub</a>', unsafe_allow_html=True)
     with col3:

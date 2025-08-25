@@ -8,6 +8,11 @@
 
 An interactive web application built with Streamlit to predict the risk of heart disease based on patient data. This app uses a pre-trained XGBoost model and provides model explanations using SHAP (SHapley Additive exPlanations) to ensure transparency and interpretability.
 
+🚀 Live Demo
+------------
+
+[**<-- Try the app live here! -->**](https://heart-disease-app-subhranildas.streamlit.app/ "null")
+
 📖 Project Overview
 -------------------
 
@@ -15,10 +20,6 @@ Heart disease remains a leading cause of mortality worldwide. Early detection an
 
 The primary goal is not just to provide a prediction, but to do so in a way that is transparent and understandable. By integrating SHAP (SHapley Additive exPlanations), the application demystifies the model's decision-making process, showing exactly which factors contribute to a given risk assessment. This approach, often called Explainable AI (XAI), is vital in healthcare for building trust and providing actionable insights to both patients and clinicians.
 
-🚀 Live Demo
-------------
-
-[**<-- Try the app live here! -->**](https://heart-disease-app-subhranildas.streamlit.app/ "null")
 
 ✨ Features
 ----------
